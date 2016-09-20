@@ -251,7 +251,9 @@ namespace ConsoleApplication2
                 Requirement currentRequirement = null;
 
 
-                bool requirementInUse = false;
+                bool headingInUse = false;
+                bool subHeadingInUse = false;
+                bool subSubHeadingInUse = false;
 
                 Console.WriteLine("Finding all headings in sheet...");
                 // get headings in the sheet
@@ -272,21 +274,30 @@ namespace ConsoleApplication2
                             //Console.WriteLine("heading found '" + cellData + "'");
                             currentHeading = new Heading(cellData, currentLocation, title);  // create new heading object from the current location
                             headings.Add(currentHeading);
-                            requirementInUse = false;
+
+                            headingInUse = true;
+                            subHeadingInUse = false;
+                            subSubHeadingInUse = false;
                         }
                         else if (count == 1)
                         {
                             //Console.WriteLine("Subheading found '" + cellData + "'");
                             currentSubHeading = new SubHeading(cellData, currentLocation, title);  // create new heading object from the current location
                             currentHeading.addSubHeadingToList(currentSubHeading);
-                            requirementInUse = false;
+
+                            headingInUse = false;
+                            subHeadingInUse = true;
+                            subSubHeadingInUse = false;
                         }
                         else if (count == 2)
                         {
                             //Console.WriteLine("SubSubHeading found '" + cellData + "'");
                             currentSubSubHeading = new SubSubHeading(cellData, currentLocation, title);  // create new heading object from the current location
                             currentSubHeading.addSubSubHeadingToList(currentSubSubHeading);
-                            requirementInUse = true;
+
+                            headingInUse = false;
+                            subHeadingInUse = false;
+                            subSubHeadingInUse = true;
                         }
                         else if (count == 3)
                         {
@@ -301,15 +312,20 @@ namespace ConsoleApplication2
                         if (isRequirement(cellData))
                         {
                             currentRequirement = new Requirement(cellData, currentLocation, title);
-                            if (requirementInUse)
+                            if (subSubHeadingInUse)
                             {
                                 //Console.WriteLine("subsub requirement found '" + cellData + "'");
                                 currentSubSubHeading.addRequirementToList(currentRequirement);
                             }
-                            else
+                            else if(subHeadingInUse)
                             {
                                 //Console.WriteLine("sub requirement found '" + cellData + "'");
                                 currentSubHeading.addRequirementToList(currentRequirement);
+                            }
+                            else if(headingInUse)
+                            {
+                                //Console.WriteLine("heading requirement found '" + cellData + "'");
+                                currentHeading.addRequirementToList(currentRequirement);
                             }
                         }
 
@@ -324,11 +340,16 @@ namespace ConsoleApplication2
                 // Calculate Heading Averages
                 for (int systemNumber = 1; systemNumber <= noSystems; systemNumber++)
                 {
+                    
                     for (int i = 0; i < headings.Count; i++)
                     {
                         currentHeading = headings[i];
                         List<SubHeading> subHeadings = currentHeading.getSubHeadings();
                         String currentHeadingAverage = "";
+
+                        
+
+
                         for (int j = 0; j < subHeadings.Count; j++)
                         {
                             currentSubHeading = subHeadings[j];
@@ -406,8 +427,24 @@ namespace ConsoleApplication2
                                 if (currentSubHeading.hasRequirements() || currentSubHeading.hasSubSubHeadings())
                                  currentHeadingAverage = currentHeadingAverage + currentSubHeadingLocation.getExcelAddress() + " , ";
                         }
-                        if(currentHeadingAverage != "")
-                        currentHeadingAverage = "AVERAGE(" + currentHeadingAverage + ")";
+
+                        if (currentHeading.hasRequirements())
+                        {
+
+                            int row = currentHeading.getLocation().getRow() + currentHeading.getRequirements().Count + 1;
+                            int col = currentHeading.getLocation().getColumn() + 1 + systemNumber;
+                            Location l = new Location(row, col);
+                            String data = currentHeading.assignAverageForRequirements(systemNumber);
+                            Console.WriteLine("Writing " + data + " to location " + l.getAddress());
+                            writeToSingleCell(l, data, 0);
+                            currentHeadingAverage += l.getExcelAddress() + "/10"; // divide average of requirements by 10 so we don't get X00%
+                        }
+
+                        if (currentHeadingAverage != "")
+                        {
+                            
+                            currentHeadingAverage = "AVERAGE(" + currentHeadingAverage + ")";
+                        }
                         currentHeadingAverage = "=IFERROR(" + currentHeadingAverage + ", 0)";
                         Location currentHeadingAverageLocation = new Location(currentHeading.getLocation().getRow(), (currentHeading.getLocation().getColumn() + 1 + systemNumber));
                         //Console.WriteLine("Heading location " + currentHeadingAverageLocation.getExcelAddress());
@@ -642,7 +679,50 @@ namespace ConsoleApplication2
             Console.WriteLine("Assigning scorer table values to main...");
             for (int i = 0; i < headings.Count; i++)
             {
-                List<SubHeading> subHeadings = headings[i].getSubHeadings();
+                Heading heading = headings[i];
+
+
+                // handle case where a heading has a direct set of requirements
+                if(heading.hasRequirements())
+                {
+                    List<Requirement> reqs = heading.getRequirements();
+                    for (int k = 0; k < reqs.Count; k++)
+                    {
+                        Requirement inReq = reqs[k];
+                        int homeRow = inReq.getLocation().getRow();
+                        int homeCol = inReq.getLocation().getColumn();
+                        homeCol = homeCol + 2;
+                        for (int l = 1; l <= noSystems; l++)
+                        {
+
+                            String average = "";
+                            int indexCol = homeCol + columnLength;
+
+                            for (int m = 1; m <= noScorers; m++)
+                            {
+
+                                Location loc = new Location(homeRow, indexCol);
+                                if (m != noScorers)
+                                    average = average + loc.getExcelAddress() + ", ";
+                                else
+                                    average = average + loc.getExcelAddress() + ")";
+                                indexCol += columnLength;
+
+                            }
+
+                            average = "=IFERROR(AVERAGE(" + average + ", \"\")";
+                            Location cell = new Location(homeRow, homeCol);
+                            writeToSingleCell(cell, average, 0);
+                            homeCol = homeCol + 1;
+
+                            // make string
+                        }
+
+                    }
+                }
+
+
+                List<SubHeading> subHeadings = heading.getSubHeadings();
                 for (int j = 0; j < subHeadings.Count; j++)
                 {
                     SubHeading subHeading = subHeadings[j];

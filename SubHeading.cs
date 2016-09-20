@@ -29,7 +29,7 @@ namespace ConsoleApplication2
             this.title = title;
         }
 
-        public void setRequirements(List<SubSubHeading> subsubHeadings)
+        public void setSubSubHeadings(List<SubSubHeading> subsubHeadings)
         {
             this.subSubHeadings = subsubHeadings;
         }

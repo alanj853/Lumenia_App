@@ -186,6 +186,7 @@ namespace ConsoleApplication2
 
 
             bool subHeadingInUse = false;
+            bool headingInUse = false;
 
             Console.Write("Finding all headings in sheet...");
             // get headings in the sheet
@@ -206,6 +207,7 @@ namespace ConsoleApplication2
                         //Console.WriteLine("heading found '" + cellData + "'");
                         currentHeading = new Heading(cellData, currentLocation, title);  // create new heading object from the current location
                         headings.Add(currentHeading);
+                        headingInUse = true;
                         subHeadingInUse = false;
                     }
                     else if (y == 1)
@@ -213,7 +215,8 @@ namespace ConsoleApplication2
                         //Console.WriteLine("Subheading found '" + cellData + "'");
                         currentSubHeading = new SubHeading(cellData, currentLocation, title);  // create new heading object from the current location
                         currentHeading.addSubHeadingToList(currentSubHeading);
-                        subHeadingInUse = true;
+                        subHeadingInUse = true; 
+                        headingInUse = false;
                     }
                     else if (y == 2)
                     {
@@ -223,12 +226,16 @@ namespace ConsoleApplication2
                             currentSubSubHeading = new SubSubHeading(cellData, currentLocation, title);  // create new heading object from the current location
                             currentSubHeading.addSubSubHeadingToList(currentSubSubHeading);
                             subHeadingInUse = false;
+                            headingInUse = false;
                         }
                         else
                         {
-                           // Console.WriteLine("Requirement found '" + cellData + "'");
+                            // Console.WriteLine("Requirement found '" + cellData + "'");
                             currentRequirement = new Requirement(cellData, currentLocation, "");
                             currentRequirement.setUpdateTitle();
+                            if(headingInUse)
+                                currentHeading.addRequirementToList(currentRequirement);
+                                else if(subHeadingInUse)
                             currentSubHeading.addRequirementToList(currentRequirement);
                         }
                     }
@@ -240,7 +247,9 @@ namespace ConsoleApplication2
                         //Console.WriteLine("Requirement found '" + cellData + "'");
                         currentRequirement = new Requirement(cellData, currentLocation, "");
                         currentRequirement.setUpdateTitle();
-                        if (subHeadingInUse)
+                        if (headingInUse)
+                            currentHeading.addRequirementToList(currentRequirement);
+                        else if (subHeadingInUse)
                             currentSubHeading.addRequirementToList(currentRequirement);
                         else
                             currentSubSubHeading.addRequirementToList(currentRequirement);
@@ -254,7 +263,9 @@ namespace ConsoleApplication2
                         currentLocation = new Location(currRow, titleColumn);
                         currentRequirement = new Requirement(cellData, currentLocation, "");
                         // Console.WriteLine("Requirement found '" + cellData + "'");
-                        if (subHeadingInUse)
+                        if (headingInUse)
+                            currentHeading.addRequirementToList(currentRequirement);
+                        else if (subHeadingInUse)
                             currentSubSubHeading.addRequirementToList(currentRequirement);
                         else
                             currentSubHeading.addRequirementToList(currentRequirement);
@@ -345,6 +356,25 @@ namespace ConsoleApplication2
 
                 rowIndex++;
 
+                bool noScoreRequiredFlag_forHeading = false;
+
+                if (h.hasRequirements() && !noScoreRequiredFlag_forHeading)
+                {
+                    List<Requirement> reqs = h.getRequirements();
+                    for (int k = 0; k < reqs.Count; k++)
+                    {
+                        Requirement req = reqs[k];
+                        Location reqNumberLocation = new Location(rowIndex, colIndex + 1);
+                        String reqNumber = req.getTitle();
+
+                        writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                        rowIndex++;
+                    }
+                    Location reqAverageRow = new Location(rowIndex, colIndex + 1);
+                    writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
+                    rowIndex++;
+                }
+
                 List<SubHeading> subHeadings = h.getSubHeadings();
                 for (int j = 0; j < subHeadings.Count; j++)
                 {
@@ -363,7 +393,7 @@ namespace ConsoleApplication2
                     rowIndex++;
 
                     Boolean noScoreRequiredFlag_forSubHeading = false; // flag to let program know if it has to assign a "No Score" row... uses different procedure
-                   // Boolean noScoreRequiredFlag_forSubSubHeading = false; // flag to let program know if it has to assign a "No Score" row... uses different procedure
+                    // Boolean noScoreRequiredFlag_forSubSubHeading = false; // flag to let program know if it has to assign a "No Score" row... uses different procedure
 
                     if (subHeadingNumber.Contains("_x") || subHeadingNumber.Contains("_X"))
                     {
@@ -474,12 +504,17 @@ namespace ConsoleApplication2
                                 Location reqAverageRow = new Location(rowIndex, colIndex + 1);
                                 writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
                                 rowIndex++;
-                            } 
-                            
+                            }
+
                         }
                     }
 
-
+                    /*if (!noScoreRequiredFlag_forHeading)
+                    {
+                        Location reqAverageRow = new Location(rowIndex, colIndex + 1);
+                        writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
+                        rowIndex++;
+                    }*/
                 }
             }
             Console.WriteLine("DONE");
