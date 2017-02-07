@@ -354,7 +354,8 @@ namespace ConsoleApplication2
                         {
                             currentSubHeading = subHeadings[j];
                             Location currentSubHeadingLocation = new Location(currentSubHeading.getLocation().getRow(), (currentSubHeading.getLocation().getColumn() + 1 + systemNumber));
-                            String currentSubHeadingAverage = "";
+                            String currentSubHeadingAverage_1 = ""; // to accumlate average for number of subsubheadings
+                            String currentSubHeadingAverage_2 = ""; // to accumlate average for number of requirements
 
 
                             if (currentSubHeading.hasSubSubHeadings())
@@ -373,15 +374,15 @@ namespace ConsoleApplication2
                                     if (isValidRow(row) && currentSubSubHeading.hasRequirements())
                                     {
                                         if (k == (subSubHeadings.Count - 1))
-                                            currentSubHeadingAverage = currentSubHeadingAverage + l.getExcelAddress();
+                                            currentSubHeadingAverage_1 = currentSubHeadingAverage_1 + l.getExcelAddress();
                                         else
-                                            currentSubHeadingAverage = currentSubHeadingAverage + l.getExcelAddress() + " , ";
+                                            currentSubHeadingAverage_1 = currentSubHeadingAverage_1 + l.getExcelAddress() + " , ";
                                     }
                                 }
-                                if (currentSubHeadingAverage != "")
+                                if (currentSubHeadingAverage_1 != "")
                                 {
-                                    currentSubHeadingAverage = "AVERAGE(" + currentSubHeadingAverage + ")";
-                                    currentSubHeadingAverage = "=IFERROR(" + currentSubHeadingAverage + "/10,\"\")";
+                                    currentSubHeadingAverage_1 = "AVERAGE(" + currentSubHeadingAverage_1 + ")";
+                                    currentSubHeadingAverage_1 = "=IFERROR(" + currentSubHeadingAverage_1 + "/10,\"\")";
 
                                 }
                             }
@@ -394,8 +395,35 @@ namespace ConsoleApplication2
                                 Location l = new Location(row, col);
                                 String data = currentSubHeading.assignAverageForRequirements(systemNumber);
                                 writeToSingleCell(l, data, 0);
-                                currentSubHeadingAverage = "=IFERROR(" + l.getExcelAddress() + "/10,0)";
+                                currentSubHeadingAverage_2 = "=IFERROR(" + l.getExcelAddress() + "/10,0)";
                             }
+
+
+                            String currentSubHeadingAverage = "";
+
+                            if (currentSubHeading.hasSubSubHeadings())
+                            {
+                                currentSubHeadingAverage = currentSubHeadingAverage_1;
+                            }
+
+                            if (currentSubHeading.hasRequirements())
+                            {
+                                currentSubHeadingAverage = currentSubHeadingAverage_2;
+                            }
+
+                            if (currentSubHeading.hasSubSubHeadings() && currentSubHeading.hasRequirements())
+                            {
+                                //Console.WriteLine("************************************");
+                                //Console.WriteLine("Special Case. It has both requirements and subsubheadings");
+                                //Console.WriteLine("String is now: " + currentSubHeadingAverage_1 + " && " + currentSubHeadingAverage_2);
+                                //Console.WriteLine("************************************");
+
+                                currentSubHeadingAverage = formatNewAverageString(currentSubHeadingAverage_1, currentSubHeadingAverage_2);
+                                //Console.WriteLine("String is now: " + currentSubHeadingAverage);
+                                //Console.WriteLine("************************************");
+                            }
+
+
                             //else
                             //    Console.WriteLine("Sub heading " + currentSubHeading.getValue() + " has no  reqs");
 
@@ -471,6 +499,47 @@ namespace ConsoleApplication2
                 appFinishedRunning = true;
                 
             }
+        }
+
+        private string formatNewAverageString(string currentSubHeadingAverage_1, string currentSubHeadingAverage_2)
+        {
+            /*
+             * Assumes currentSubHeadingAverage_2 is of the format: =IFERROR(AVERAGE(H171 , H175 , H182 , H188 , H194)/10,"")
+             * Assumes currentSubHeadingAverage_1 is of the format: =IFERROR(H163/10,0)
+             * 
+             */
+            String new_1 = "";
+            String new_2 = "";
+
+           
+
+            new_2 = currentSubHeadingAverage_2.Replace("=IFERROR(", "");
+            new_2 = new_2.Replace("/10,0)", "");
+
+            //Console.WriteLine("This is new_2: + " + new_2);
+
+            /*
+             * currentSubHeadingAverage_1 should now be of the format: AVERAGE(H171 , H175 , H182 , H188 , H194)
+             * 
+             */
+
+            new_1 = currentSubHeadingAverage_1.Replace("=IFERROR(", "");
+            new_1 = new_1.Replace("/10,\"\")", "");
+
+            //Console.WriteLine("This is new_1: + " + new_1);
+            /*
+            * currentSubHeadingAverage_1 should now be of the format: H163
+             * 
+            */
+
+
+            /*
+             * We should then return a string of the format: =IFERROR((AVERAGE(" + H163 + "," + AVERAGE(H171 , H175 , H182 , H188 , H194) + ")/10),0)
+             * 
+             */
+            return "=IFERROR((AVERAGE(" + new_1 + "," + new_2 + ")/10),0)";
+
+            
         }
 
 
