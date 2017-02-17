@@ -213,9 +213,28 @@ namespace ConsoleApplication2
                     else if (y == 1)
                     {
                         //Console.WriteLine("Subheading found '" + cellData + "'");
+                        if(currentHeading.getSubHeadings().Count() > 0)
+                        {
+                            List<SubHeading> list = currentHeading.getSubHeadings();
+
+
+                            for (int i = 0; i < list.Count(); i++)
+                            {
+                                SubHeading s1 = list[i];
+                                String val = s1.getValue();
+                                char[] arr = val.ToCharArray();
+
+                                // checking to see if number is a X.10, X.20 or X.30 number. If you add a '0' to the end otherwise excel will treat it as X.1, X.2 or X.3, respectfully
+                                if (val == cellData && (arr[arr.Length - 1] == '1' || arr[arr.Length - 1] == '2' || arr[arr.Length - 1] == '3') && arr[arr.Length - 2] == '.')
+                                {
+                                    Console.WriteLine("Cell data going from " + cellData + " to " + cellData + "0");
+                                    cellData = cellData + "0";
+                                }
+                            }
+                        }
                         currentSubHeading = new SubHeading(cellData, currentLocation, title);  // create new heading object from the current location
                         currentHeading.addSubHeadingToList(currentSubHeading);
-                        subHeadingInUse = true; 
+                        subHeadingInUse = true;
                         headingInUse = false;
                     }
                     else if (y == 2)
@@ -223,6 +242,27 @@ namespace ConsoleApplication2
                         if (MyValues.GetValue(currRow, titleColumn) != null)
                         {
                             //Console.WriteLine("SubSubHeading found '" + cellData + "'");
+
+                            if (currentSubHeading.getSubSubHeadings().Count() > 0)
+                            {
+                                List<SubSubHeading> list = currentSubHeading.getSubSubHeadings();
+
+
+                                for (int i = 0; i < list.Count(); i++)
+                                {
+                                    SubSubHeading s1 = list[i];
+                                    String val = s1.getValue();
+                                    char[] arr = val.ToCharArray();
+
+                                    // checking to see if number is a X.X.10, X.X.20 or X.X.30 number. If you add a '0' to the end otherwise excel will treat it as X.X.1, X.X.2 or X.X.3, respectfully
+                                    if (val == cellData && (arr[arr.Length - 1] == '1' || arr[arr.Length - 1] == '2' || arr[arr.Length - 1] == '3') && arr[arr.Length - 2] == '.')
+                                    {
+                                        Console.WriteLine("Cell data going from " + cellData + " to " + cellData + "0");
+                                        cellData = cellData + "0";
+                                    }
+                                }
+                            }
+
                             currentSubSubHeading = new SubSubHeading(cellData, currentLocation, title);  // create new heading object from the current location
                             currentSubHeading.addSubSubHeadingToList(currentSubSubHeading);
                             subHeadingInUse = false;
@@ -233,10 +273,10 @@ namespace ConsoleApplication2
                             // Console.WriteLine("Requirement found '" + cellData + "'");
                             currentRequirement = new Requirement(cellData, currentLocation, "");
                             currentRequirement.setUpdateTitle();
-                            if(headingInUse)
+                            if (headingInUse)
                                 currentHeading.addRequirementToList(currentRequirement);
-                                else if(subHeadingInUse)
-                            currentSubHeading.addRequirementToList(currentRequirement);
+                            else if (subHeadingInUse)
+                                currentSubHeading.addRequirementToList(currentRequirement);
                         }
                     }
                     else if (y == 3)
@@ -354,6 +394,7 @@ namespace ConsoleApplication2
                 writeToSingleCell(headingNumberLocation, headingNumber, 0, 1, 5, 21, true, false, true, System.Drawing.Color.Black, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignCenter, "Arial", 10);
                 writeToSingleCell(headingTitleLocation, headingTitle, 0, 1, 63, 21, true, false, true, System.Drawing.Color.Black, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignCenter, "Arial", 10);
 
+
                 rowIndex++;
 
                 bool noScoreRequiredFlag_forHeading = false;
@@ -389,6 +430,12 @@ namespace ConsoleApplication2
 
                     writeToSingleCell(subHeadingNumberLocation, subHeadingNumber, 0, TYPE_SUBHEADING, 5, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
                     writeToSingleCell(subHeadingTitleLocation, subHeadingTitle, 0, TYPE_SUBHEADING, 63, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+
+                    if (subHeadingNumber == "6.1" || subHeadingNumber == "6.10")
+                        Console.WriteLine("Found " + subHeadingNumber + " at location " + subHeadingNumberLocation.getAddress());
+
+                    if (isTen(subHeadingNumber))
+                    applyNumberFormatting(subHeadingNumberLocation, subHeadingNumberLocation, TYPE_SUBHEADING, true);
 
                     rowIndex++;
 
@@ -441,6 +488,10 @@ namespace ConsoleApplication2
 
                             writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, 5, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
                             writeToSingleCell(subSubHeadingTitleLocation, subSubHeadingTitle, 0, TYPE_SUBSUBHEADING, 63, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                            
+                            if (isTen(subSubHeadingNumber))
+                                applyNumberFormatting(subSubHeadingNumberLocation, subSubHeadingNumberLocation, TYPE_SUBSUBHEADING, true);
+
                             rowIndex++;
 
                             /*
@@ -731,20 +782,20 @@ namespace ConsoleApplication2
                 {
                     Location startRange = new Location(l.getRow(), colIndex);
                     Location endRange = new Location(l.getRow(), colIndex + noSystems - 1);
-                    applyNumberFormatting(startRange, endRange, l.getCellType());
+                    applyNumberFormatting(startRange, endRange, l.getCellType(), false);
                 }
                 if (l.getCellType() == TYPE_REQUIREMENT)
                 {
                     Location startRange = new Location(l.getRow(), colIndex);
                     Location endRange = new Location(l.getRow(), colIndex + noSystems - 1);
                     //applyConditionalFormatting(startRange, endRange);
-                    applyNumberFormatting(startRange, endRange, l.getCellType());
+                    applyNumberFormatting(startRange, endRange, l.getCellType(), false);
                 }
                 if (l.getCellType() == TYPE_AVERAGE)
                 {
                     Location startRange = new Location(l.getRow(), colIndex);
                     Location endRange = new Location(l.getRow(), colIndex + noSystems - 1);
-                    applyNumberFormatting(startRange, endRange, l.getCellType());
+                    applyNumberFormatting(startRange, endRange, l.getCellType(), false);
                 }
             }
             Console.WriteLine("DONE");
@@ -855,6 +906,7 @@ namespace ConsoleApplication2
                 r.VerticalAlignment = vertAlignment;
                 r.Font.Name = fontName;
                 r.Font.Size = fontSize;
+                r.NumberFormat = "";
             }
         }
 
@@ -1072,7 +1124,7 @@ namespace ConsoleApplication2
 
         }
 
-        private void applyNumberFormatting(Location startRangeLocation, Location endRangeLocation, int cellType)
+        private void applyNumberFormatting(Location startRangeLocation, Location endRangeLocation, int cellType, Boolean assigningNumber)
         {
             int startRow = startRangeLocation.getRow();
             int startCol = startRangeLocation.getColumn();
@@ -1081,18 +1133,51 @@ namespace ConsoleApplication2
 
             String startRange = getExcelColumnName(startCol) + startRow.ToString();
             String endRange = getExcelColumnName(endCol) + endRow.ToString();
-            //Console.WriteLine("Applying Number Formatting to range " + startRange + ":" + endRange);
+            Console.WriteLine("Applying Number Formatting to range " + startRange + ":" + endRange);
             Excel.Range r = newTableSheet.get_Range(startRange, endRange);
-            if (cellType == TYPE_REQUIREMENT)
-                r.NumberFormat = "0.0";// "###,##.#";
-            if (cellType == TYPE_HEADING || cellType == TYPE_SUBHEADING)
-            {
-                r.Style = "Percent";// "###,##.#%";
-                //r.NumberFormat = "0.00%";
 
-            }
-            if (cellType == TYPE_AVERAGE)
+
+            // for assigning number formatting to subheadings and subsubheadings numbers
+            if (assigningNumber)
+            {
                 r.NumberFormat = "0.00";
+            }
+
+            else
+            {
+                if (cellType == TYPE_REQUIREMENT)
+                    r.NumberFormat = "0.0";// "###,##.#";
+                if (cellType == TYPE_HEADING || cellType == TYPE_SUBHEADING)
+                {
+                    r.Style = "Percent";// "###,##.#%";
+                                        //r.NumberFormat = "0.00%";
+
+                }
+                if (cellType == TYPE_AVERAGE)
+                    r.NumberFormat = "0.00";
+            }
+        }
+
+        /* Method to detect if a subheading or subsubheading value is of number X.10, meaning heading/subheading X, subheading/subsubheading 10, 20 or 30
+         * Is necessary as Excel will treat an X.10 number as X.1, not X.10 (dot ten)
+         */
+        private Boolean isTen(String x)
+        {
+            Char[] arr = x.ToCharArray();
+            int len = arr.Length;
+
+            char zero = '0';
+            char one = '1';
+            char two = '2';
+            char three = '3';
+            char dot = '.';
+
+            if (arr[len - 1] == zero && (arr[len - 2] == one || arr[len - 2] == two || arr[len - 2] == three) && arr[len - 3] == dot)
+            {
+                Console.WriteLine("Value: " + x + " has a .10");
+                return true;
+            }
+            return false;
         }
 
 

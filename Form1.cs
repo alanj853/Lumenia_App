@@ -74,7 +74,7 @@ namespace WindowsFormsApplication1
             }
             else
                 status.Text = "Finished Building Excel Table. Exit Code = " + exitCode;
-            exitLabel.Text = "";//"Application can now be closed";
+            exitLabel.Text = "Process Completed";
 
             appIsRunning = false;
         }
