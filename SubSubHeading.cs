@@ -13,6 +13,7 @@ namespace ConsoleApplication2
         private Boolean averageOfRequirementsAssigned = false;
         private String averageOfRequirements = "";
         private String title = "No title assigned";
+        private Boolean isRequirement = false;
 
         public SubSubHeading(String value, Location location)
         {
@@ -50,6 +51,14 @@ namespace ConsoleApplication2
         public String getValue()
         {
             return this.value;
+        }
+
+        public Boolean isAlsoRequirement() {
+            return this.isRequirement;
+        }
+
+        public void setIsAlsoRequirement() {
+            this.isRequirement = true;
         }
 
         public String assignAverageForRequirements(int systemNo)

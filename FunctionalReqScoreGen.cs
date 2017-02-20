@@ -309,22 +309,23 @@ namespace ConsoleApplication2
                     else if (MyValues.GetValue(currRow, titleColumn) != null)
                     {
                         string cellData = MyValues.GetValue(currRow, titleColumn).ToString();
+                        Console.WriteLine("Cell on row " + currRow + " col " + numberingColumn + " = null" + " : Celldata in title colloim is " + cellData + " col " + titleColumn);
                         if (isRequirement(cellData))
                         {
                             currentRequirement = new Requirement(cellData, currentLocation, title);
                             if (subSubHeadingInUse)
                             {
-                                //Console.WriteLine("subsub requirement found '" + cellData + "'");
+                                Console.WriteLine("subsub requirement found '" + cellData + "'");
                                 currentSubSubHeading.addRequirementToList(currentRequirement);
                             }
                             else if(subHeadingInUse)
                             {
-                                //Console.WriteLine("sub requirement found '" + cellData + "'");
+                                Console.WriteLine("sub requirement found '" + cellData + "'");
                                 currentSubHeading.addRequirementToList(currentRequirement);
                             }
                             else if(headingInUse)
                             {
-                                //Console.WriteLine("heading requirement found '" + cellData + "'");
+                                Console.WriteLine("heading requirement found '" + cellData + "'");
                                 currentHeading.addRequirementToList(currentRequirement);
                             }
                         }
@@ -354,8 +355,8 @@ namespace ConsoleApplication2
                         {
                             currentSubHeading = subHeadings[j];
                             Location currentSubHeadingLocation = new Location(currentSubHeading.getLocation().getRow(), (currentSubHeading.getLocation().getColumn() + 1 + systemNumber));
-                            String currentSubHeadingAverage_1 = ""; // to accumlate average for number of subsubheadings
-                            String currentSubHeadingAverage_2 = ""; // to accumlate average for number of requirements
+                            String currentSubHeadingAverage_ssh = ""; // to accumlate average for number of subsubheadings
+                            String currentSubHeadingAverage_reqs = ""; // to accumlate average for number of requirements
 
 
                             if (currentSubHeading.hasSubSubHeadings())
@@ -374,15 +375,15 @@ namespace ConsoleApplication2
                                     if (isValidRow(row) && currentSubSubHeading.hasRequirements())
                                     {
                                         if (k == (subSubHeadings.Count - 1))
-                                            currentSubHeadingAverage_1 = currentSubHeadingAverage_1 + l.getExcelAddress();
+                                            currentSubHeadingAverage_ssh = currentSubHeadingAverage_ssh + l.getExcelAddress();
                                         else
-                                            currentSubHeadingAverage_1 = currentSubHeadingAverage_1 + l.getExcelAddress() + " , ";
+                                            currentSubHeadingAverage_ssh = currentSubHeadingAverage_ssh + l.getExcelAddress() + " , ";
                                     }
                                 }
-                                if (currentSubHeadingAverage_1 != "")
+                                if (currentSubHeadingAverage_ssh != "")
                                 {
-                                    currentSubHeadingAverage_1 = "AVERAGE(" + currentSubHeadingAverage_1 + ")";
-                                    currentSubHeadingAverage_1 = "=IFERROR(" + currentSubHeadingAverage_1 + "/10,\"\")";
+                                    currentSubHeadingAverage_ssh = "AVERAGE(" + currentSubHeadingAverage_ssh + ")";
+                                    currentSubHeadingAverage_ssh = "=IFERROR(" + currentSubHeadingAverage_ssh + "/10,\"\")";
 
                                 }
                             }
@@ -395,7 +396,7 @@ namespace ConsoleApplication2
                                 Location l = new Location(row, col);
                                 String data = currentSubHeading.assignAverageForRequirements(systemNumber);
                                 writeToSingleCell(l, data, 0);
-                                currentSubHeadingAverage_2 = "=IFERROR(" + l.getExcelAddress() + "/10,0)";
+                                currentSubHeadingAverage_reqs = data; //"=IFERROR(" + l.getExcelAddress() + "/10,0)";
                             }
 
 
@@ -403,12 +404,12 @@ namespace ConsoleApplication2
 
                             if (currentSubHeading.hasSubSubHeadings())
                             {
-                                currentSubHeadingAverage = currentSubHeadingAverage_1;
+                                currentSubHeadingAverage = currentSubHeadingAverage_ssh;
                             }
 
                             if (currentSubHeading.hasRequirements())
                             {
-                                currentSubHeadingAverage = currentSubHeadingAverage_2;
+                                currentSubHeadingAverage = currentSubHeadingAverage_reqs;
                             }
 
                             if (currentSubHeading.hasSubSubHeadings() && currentSubHeading.hasRequirements())
@@ -418,7 +419,7 @@ namespace ConsoleApplication2
                                 //Console.WriteLine("String is now: " + currentSubHeadingAverage_1 + " && " + currentSubHeadingAverage_2);
                                 //Console.WriteLine("************************************");
 
-                                currentSubHeadingAverage = formatNewAverageString(currentSubHeadingAverage_1, currentSubHeadingAverage_2);
+                                currentSubHeadingAverage = formatNewAverageString(currentSubHeadingAverage_ssh, currentSubHeadingAverage_reqs);
                                 //Console.WriteLine("String is now: " + currentSubHeadingAverage);
                                 //Console.WriteLine("************************************");
                             }
@@ -501,7 +502,7 @@ namespace ConsoleApplication2
             }
         }
 
-        private string formatNewAverageString(string currentSubHeadingAverage_1, string currentSubHeadingAverage_2)
+        private string formatNewAverageString(string currentSubHeadingAverage_ssh, string currentSubHeadingAverage_req)
         {
             /*
              * Assumes currentSubHeadingAverage_2 is of the format: =IFERROR(AVERAGE(H171 , H175 , H182 , H188 , H194)/10,"")
@@ -511,10 +512,13 @@ namespace ConsoleApplication2
             String new_1 = "";
             String new_2 = "";
 
-           
+            Console.WriteLine("currSubHead1: " + currentSubHeadingAverage_ssh + "    CurrSubHead2:" + currentSubHeadingAverage_req);
 
-            new_2 = currentSubHeadingAverage_2.Replace("=IFERROR(", "");
-            new_2 = new_2.Replace("/10,0)", "");
+        //   ) ,"")
+
+            //new_2 = currentSubHeadingAverage_2.Replace("=IFERROR(", "");
+            new_2 = currentSubHeadingAverage_req.Replace("=IFERROR(AVERAGE(", "");
+            new_2 = new_2.Replace(") ,\"\")","");
 
             //Console.WriteLine("This is new_2: + " + new_2);
 
@@ -523,9 +527,14 @@ namespace ConsoleApplication2
              * 
              */
 
-            new_1 = currentSubHeadingAverage_1.Replace("=IFERROR(", "");
-            new_1 = new_1.Replace("/10,\"\")", "");
+            Console.WriteLine("currSubHead1: " + new_1 + "    CurrSubHead2:" + new_2);
 
+
+            new_1 = currentSubHeadingAverage_ssh.Replace("=IFERROR(AVERAGE(", "");
+            new_1 = new_1.Replace(")/10,\"\")", "");
+
+
+            Console.WriteLine("currSubHead1: " + new_1 + "    CurrSubHead2:" + new_2);
             //Console.WriteLine("This is new_1: + " + new_1);
             /*
             * currentSubHeadingAverage_1 should now be of the format: H163
@@ -537,9 +546,13 @@ namespace ConsoleApplication2
              * We should then return a string of the format: =IFERROR((AVERAGE(" + H163 + "," + AVERAGE(H171 , H175 , H182 , H188 , H194) + ")/10),0)
              * 
              */
-            return "=IFERROR((AVERAGE(" + new_1 + "," + new_2 + ")/10),0)";
+            //return "=IFERROR((AVERAGE(" + new_1 + "," + new_2 + ")/10),0)";
 
-            
+            String ret = "=IFERROR((AVERAGE(" + new_1 + "," + new_2 + ")/10),0)";
+
+            return ret;
+
+
         }
 
 

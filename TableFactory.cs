@@ -190,8 +190,14 @@ namespace ConsoleApplication2
 
             Console.Write("Finding all headings in sheet...");
             // get headings in the sheet
+
+            int special = 0;
+
             while (currRow != endRow)
             {
+                special++;
+                if (special == 100 || special == 200)
+                    special = 100;
                 Location currentLocation = new Location(currRow, numberingColumn);
                 String title = "";
                 if (MyValues.GetValue(currRow, titleColumn) != null)
@@ -201,8 +207,17 @@ namespace ConsoleApplication2
                 {
 
                     string cellData = MyValues.GetValue(currRow, numberingColumn).ToString();
-                    int y = decimalPlacesCounter(cellData);
-                    if (y == 0)
+                    Console.WriteLine("This is Cell data: " + cellData);
+                    int pause = 0;
+
+                    if (pause == 1)
+                        pause = 0;
+
+                    if (cellData == "6.4.8")
+                        pause = 1;
+
+                    int count = decimalPlacesCounter(cellData);
+                    if (count == 0)
                     {
                         //Console.WriteLine("heading found '" + cellData + "'");
                         currentHeading = new Heading(cellData, currentLocation, title);  // create new heading object from the current location
@@ -210,7 +225,7 @@ namespace ConsoleApplication2
                         headingInUse = true;
                         subHeadingInUse = false;
                     }
-                    else if (y == 1)
+                    else if (count == 1)
                     {
                         //Console.WriteLine("Subheading found '" + cellData + "'");
                         if(currentHeading.getSubHeadings().Count() > 0)
@@ -237,11 +252,11 @@ namespace ConsoleApplication2
                         subHeadingInUse = true;
                         headingInUse = false;
                     }
-                    else if (y == 2)
+                    else if (count == 2)
                     {
                         if (MyValues.GetValue(currRow, titleColumn) != null)
                         {
-                            //Console.WriteLine("SubSubHeading found '" + cellData + "'");
+                            Console.WriteLine("SubSubHeading found '" + cellData + "'");
 
                             if (currentSubHeading.getSubSubHeadings().Count() > 0)
                             {
@@ -270,16 +285,16 @@ namespace ConsoleApplication2
                         }
                         else
                         {
-                            // Console.WriteLine("Requirement found '" + cellData + "'");
+                            Console.WriteLine("Requirement found '" + cellData + "'");
                             currentRequirement = new Requirement(cellData, currentLocation, "");
                             currentRequirement.setUpdateTitle();
-                            if (headingInUse)
+                            /*if (headingInUse)
                                 currentHeading.addRequirementToList(currentRequirement);
-                            else if (subHeadingInUse)
+                            else if (subHeadingInUse)*/
                                 currentSubHeading.addRequirementToList(currentRequirement);
                         }
                     }
-                    else if (y == 3)
+                    else if (count == 3)
                     {
                         //Console.WriteLine("Requirement found '" + cellData + "'");
                         //currentSubSubHeading2 = new SubSubHeading2(cellData, currentLocation, title);  // create new heading object from the current location
@@ -287,11 +302,11 @@ namespace ConsoleApplication2
                         //Console.WriteLine("Requirement found '" + cellData + "'");
                         currentRequirement = new Requirement(cellData, currentLocation, "");
                         currentRequirement.setUpdateTitle();
-                        if (headingInUse)
+                       /* if (headingInUse)
                             currentHeading.addRequirementToList(currentRequirement);
                         else if (subHeadingInUse)
                             currentSubHeading.addRequirementToList(currentRequirement);
-                        else
+                        else*/
                             currentSubSubHeading.addRequirementToList(currentRequirement);
                     }
                 }
@@ -306,9 +321,9 @@ namespace ConsoleApplication2
                         if (headingInUse)
                             currentHeading.addRequirementToList(currentRequirement);
                         else if (subHeadingInUse)
-                            currentSubSubHeading.addRequirementToList(currentRequirement);
-                        else
                             currentSubHeading.addRequirementToList(currentRequirement);
+                        else
+                            currentSubSubHeading.addRequirementToList(currentRequirement);
                     }
 
 
@@ -417,6 +432,7 @@ namespace ConsoleApplication2
                 }
 
                 List<SubHeading> subHeadings = h.getSubHeadings();
+                int spec = 0;
                 for (int j = 0; j < subHeadings.Count; j++)
                 {
                     SubHeading s = subHeadings[j];
@@ -433,6 +449,15 @@ namespace ConsoleApplication2
 
                     if (subHeadingNumber == "6.1" || subHeadingNumber == "6.10")
                         Console.WriteLine("Found " + subHeadingNumber + " at location " + subHeadingNumberLocation.getAddress());
+
+                    if (subHeadingNumber == "6.4") {
+                        List<Requirement> reqs = s.getRequirements();
+                        spec = 1;
+                        for(int p = 0; p < reqs.Count(); p++) {
+                            Console.WriteLine("This is Req " + p + ": " + reqs[p].getValue());
+                        }
+                        Console.WriteLine("Reqs Read");
+                    }
 
                     if (isTen(subHeadingNumber))
                     applyNumberFormatting(subHeadingNumberLocation, subHeadingNumberLocation, TYPE_SUBHEADING, true);
@@ -470,6 +495,10 @@ namespace ConsoleApplication2
                         }
                         Location reqAverageRow = new Location(rowIndex, colIndex + 1);
                         writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
+                        if(spec == 1) {
+                            spec = 0;
+                        }
+                        
                         rowIndex++;
                     }
                     if (s.hasSubSubHeadings())
