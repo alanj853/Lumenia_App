@@ -396,7 +396,11 @@ namespace ConsoleApplication2
                                 Location l = new Location(row, col);
                                 String data = currentSubHeading.assignAverageForRequirements(systemNumber);
                                 writeToSingleCell(l, data, 0);
-                                currentSubHeadingAverage_reqs = data; //"=IFERROR(" + l.getExcelAddress() + "/10,0)";
+
+                                if(currentSubHeading.hasSubSubHeadings())
+                                    currentSubHeadingAverage_reqs = data; //"=IFERROR(" + l.getExcelAddress() + "/10,0)";
+                                else
+                                    currentSubHeadingAverage_reqs = "=IFERROR(" + l.getExcelAddress() + "/10,0)";
                             }
 
 
