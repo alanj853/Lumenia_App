@@ -228,7 +228,7 @@ namespace ConsoleApplication2
                     else if (count == 1)
                     {
                         //Console.WriteLine("Subheading found '" + cellData + "'");
-                        if(currentHeading.getSubHeadings().Count() > 0)
+                        if (currentHeading.getSubHeadings().Count() > 0)
                         {
                             List<SubHeading> list = currentHeading.getSubHeadings();
 
@@ -291,7 +291,7 @@ namespace ConsoleApplication2
                             /*if (headingInUse)
                                 currentHeading.addRequirementToList(currentRequirement);
                             else if (subHeadingInUse)*/
-                                currentSubHeading.addRequirementToList(currentRequirement);
+                            currentSubHeading.addRequirementToList(currentRequirement);
                         }
                     }
                     else if (count == 3)
@@ -302,12 +302,12 @@ namespace ConsoleApplication2
                         //Console.WriteLine("Requirement found '" + cellData + "'");
                         currentRequirement = new Requirement(cellData, currentLocation, "");
                         currentRequirement.setUpdateTitle();
-                       /* if (headingInUse)
-                            currentHeading.addRequirementToList(currentRequirement);
-                        else if (subHeadingInUse)
-                            currentSubHeading.addRequirementToList(currentRequirement);
-                        else*/
-                            currentSubSubHeading.addRequirementToList(currentRequirement);
+                        /* if (headingInUse)
+                             currentHeading.addRequirementToList(currentRequirement);
+                         else if (subHeadingInUse)
+                             currentSubHeading.addRequirementToList(currentRequirement);
+                         else*/
+                        currentSubSubHeading.addRequirementToList(currentRequirement);
                     }
                 }
                 else if (MyValues.GetValue(currRow, titleColumn) != null)
@@ -450,17 +450,19 @@ namespace ConsoleApplication2
                     if (subHeadingNumber == "6.1" || subHeadingNumber == "6.10")
                         Console.WriteLine("Found " + subHeadingNumber + " at location " + subHeadingNumberLocation.getAddress());
 
-                    if (subHeadingNumber == "6.4") {
+                    if (subHeadingNumber == "6.4")
+                    {
                         List<Requirement> reqs = s.getRequirements();
                         spec = 1;
-                        for(int p = 0; p < reqs.Count(); p++) {
+                        for (int p = 0; p < reqs.Count(); p++)
+                        {
                             Console.WriteLine("This is Req " + p + ": " + reqs[p].getValue());
                         }
                         Console.WriteLine("Reqs Read");
                     }
 
                     if (isTen(subHeadingNumber))
-                    applyNumberFormatting(subHeadingNumberLocation, subHeadingNumberLocation, TYPE_SUBHEADING, true);
+                        applyNumberFormatting(subHeadingNumberLocation, subHeadingNumberLocation, TYPE_SUBHEADING, true);
 
                     rowIndex++;
 
@@ -481,7 +483,88 @@ namespace ConsoleApplication2
                         rowIndex++;
                     }
 
-                    if (s.hasRequirements() && !noScoreRequiredFlag_forSubHeading)
+                    if (s.hasRequirements() && s.hasSubSubHeadings())
+                    {
+                        List<JointHeading> j_list = buildJointHeadingList(s);
+                        for (int k = 0; k < j_list.Count; k++)
+                        {
+                            JointHeading jh = j_list[k];
+                            if (jh.isRequirement())
+                            {
+                                Location reqNumberLocation = new Location(rowIndex, colIndex + 1);
+                                String reqNumber = jh.getTitle();
+
+                                writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                rowIndex++;
+
+                            }
+                            if (jh.isSubSubHeading())
+                            {
+                                SubSubHeading subSubHeading = jh.getSubSubHeading();
+                                Location subSubHeadingNumberLocation = new Location(rowIndex, colIndex);
+                                Location subSubHeadingTitleLocation = new Location(rowIndex, colIndex + 1);
+                                String subSubHeadingNumber = subSubHeading.getValue();
+                                String subSubHeadingTitle = subSubHeading.getTitle();
+
+                                writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, 5, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                writeToSingleCell(subSubHeadingTitleLocation, subSubHeadingTitle, 0, TYPE_SUBSUBHEADING, 63, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+
+                                if (isTen(subSubHeadingNumber))
+                                    applyNumberFormatting(subSubHeadingNumberLocation, subSubHeadingNumberLocation, TYPE_SUBSUBHEADING, true);
+
+                                rowIndex++;
+
+                                Boolean noScoreRequiredFlag_forSubSubHeading = false; // flag to let program know if it has to assign a "No Score" row... uses different procedure
+
+                                if (subSubHeadingNumber.Contains("_x") || subSubHeadingNumber.Contains("_X"))
+                                {
+
+                                    noScoreRequiredFlag_forSubSubHeading = true;
+                                    if (subSubHeadingNumber.Contains("_x"))
+                                        subSubHeadingNumber = subSubHeadingNumber.Replace("_x", "");
+                                    else
+                                        subSubHeadingNumber = subSubHeadingNumber.Replace("_X", "");
+
+
+                                    Location noScoreLocation = new Location(rowIndex, colIndex + 1);
+                                    writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, 5, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                    writeToSingleCell(noScoreLocation, "No Score Required", 0, TYPE_NOSCORE, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                    rowIndex++;
+                                }
+
+                                if (subSubHeading.hasRequirements() && !noScoreRequiredFlag_forSubSubHeading)
+                                {
+                                    List<Requirement> reqs = subSubHeading.getRequirements();
+                                    for (int l = 0; l < reqs.Count; l++)
+                                    {
+                                        Requirement req = reqs[l];
+                                        Location reqNumberLocation = new Location(rowIndex, colIndex + 1);
+                                        String reqNumber = req.getTitle();
+
+
+                                        writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                        rowIndex++;
+                                    }
+
+                                }
+
+                                if (!noScoreRequiredFlag_forSubSubHeading)
+                                {
+                                    Location sshReqAverageRow = new Location(rowIndex, colIndex + 1);
+                                    writeToSingleCell(sshReqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
+                                    rowIndex++;
+                                }
+
+                            }
+
+                            
+                        }
+                        //Location reqAverageRow = new Location(rowIndex, colIndex + 1);
+                       // writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, true, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 11);
+                       // rowIndex++;
+                    }
+
+                    if (s.hasRequirements() && !noScoreRequiredFlag_forSubHeading && !s.hasSubSubHeadings())
                     {
                         List<Requirement> reqs = s.getRequirements();
                         for (int k = 0; k < reqs.Count; k++)
@@ -495,13 +578,14 @@ namespace ConsoleApplication2
                         }
                         Location reqAverageRow = new Location(rowIndex, colIndex + 1);
                         writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
-                        if(spec == 1) {
+                        if (spec == 1)
+                        {
                             spec = 0;
                         }
-                        
+
                         rowIndex++;
                     }
-                    if (s.hasSubSubHeadings())
+                    if (s.hasSubSubHeadings() && !s.hasRequirements())
                     {
                         List<SubSubHeading> subSubHeadings = s.getSubSubHeadings();
                         for (int k = 0; k < subSubHeadings.Count; k++)
@@ -517,7 +601,7 @@ namespace ConsoleApplication2
 
                             writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, 5, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
                             writeToSingleCell(subSubHeadingTitleLocation, subSubHeadingTitle, 0, TYPE_SUBSUBHEADING, 63, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
-                            
+
                             if (isTen(subSubHeadingNumber))
                                 applyNumberFormatting(subSubHeadingNumberLocation, subSubHeadingNumberLocation, TYPE_SUBSUBHEADING, true);
 
@@ -832,6 +916,73 @@ namespace ConsoleApplication2
             sheetSuccessfullySetUp = true;
             return 0;
 
+        }
+
+        public List<JointHeading> buildJointHeadingList(SubHeading s)
+        {
+            List<Requirement> req_list = s.getRequirements();
+            List<SubSubHeading> ssh_list = s.getSubSubHeadings();
+            List<JointHeading> j_list = new List<JointHeading>();
+            Console.WriteLine("SH " + s.getValue() + " has " + req_list.Count + " reqs and " + ssh_list.Count + " ssh");
+
+            for (int i = 0; i < req_list.Count; i++)
+            {
+                Requirement r = req_list[i];
+                JointHeading j = new JointHeading(r.getValue(), r.getLocation(), r.getTitle(), true, false, null);
+                j_list.Add(j);
+
+            }
+
+            for (int i = 0; i < ssh_list.Count; i++)
+            {
+                SubSubHeading ssh = ssh_list[i];
+                JointHeading j = new JointHeading(ssh.getValue(), ssh.getLocation(), ssh.getTitle(), false, true, ssh);
+                j_list.Add(j);
+
+            }
+
+            for (int i = 0; i < j_list.Count; i++)
+            {
+                JointHeading j = j_list[i];
+                Console.WriteLine("This is numerbic value of " + j.getValue() + " is " + j.getNumbericValue()); ;
+
+            }
+
+            sort(j_list);
+
+            Console.WriteLine("\n\nThis is sorted JList:\n\n");
+            for (int i = 0; i < j_list.Count; i++)
+            {
+                JointHeading j = j_list[i];
+                Console.WriteLine("This is numerbic value of " + j.getValue() + " is " + j.getNumbericValue()); ;
+
+            }
+
+
+
+
+            return j_list;
+        }
+
+        private void sort(List<JointHeading> list)
+        {
+            JointHeading initial = list[0];
+
+            int index = 1;
+
+            while (index < (list.Count - 1) && list.Count > 1)
+            {
+                JointHeading current = list[index];
+                JointHeading next = list[index + 1];
+                if (next.getNumbericValue() < current.getNumbericValue())
+                {
+                    list[index] = next;
+                    list[index + 1] = current;
+                    sort(list);
+
+                }
+                index++;
+            }
         }
 
         private void makeTextFile()

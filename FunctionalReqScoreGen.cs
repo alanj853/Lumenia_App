@@ -145,12 +145,18 @@ namespace ConsoleApplication2
         public void run()
         {
             // Initial testing
-            
-            tf = new TableFactory(filePath, startRow,startCol, tasksCompleted);
+
+            tf = new TableFactory(filePath, startRow, startCol, tasksCompleted);
             tfRunning = true;
             tf.makeTable();
+/*
+            Console.WriteLine("Application Finished Running");
+            exitCode = 0;
+            appFinishedRunning = true;
+        }
             
-
+       public void test()
+       { */
             tfRunning = false;
 
             tasksCompleted = tf.getTasksCompleted();
@@ -313,6 +319,7 @@ namespace ConsoleApplication2
                         if (isRequirement(cellData))
                         {
                             currentRequirement = new Requirement(cellData, currentLocation, title);
+                            int count = decimalPlacesCounter(cellData);
                             if (subSubHeadingInUse)
                             {
                                 Console.WriteLine("subsub requirement found '" + cellData + "'");
@@ -327,6 +334,16 @@ namespace ConsoleApplication2
                             {
                                 Console.WriteLine("heading requirement found '" + cellData + "'");
                                 currentHeading.addRequirementToList(currentRequirement);
+                            }
+                        }
+                        else if(cellData == "Average") {
+                        if(subSubHeadingInUse) {
+                                subSubHeadingInUse = false;
+                                subHeadingInUse = true;
+                        }
+                        else if(subHeadingInUse) {
+                                subHeadingInUse = false;
+                                headingInUse = true;
                             }
                         }
 
@@ -357,9 +374,65 @@ namespace ConsoleApplication2
                             Location currentSubHeadingLocation = new Location(currentSubHeading.getLocation().getRow(), (currentSubHeading.getLocation().getColumn() + 1 + systemNumber));
                             String currentSubHeadingAverage_ssh = ""; // to accumlate average for number of subsubheadings
                             String currentSubHeadingAverage_reqs = ""; // to accumlate average for number of requirements
+                            Boolean averageAlreadyAssigned = false;
 
 
-                            if (currentSubHeading.hasSubSubHeadings())
+                            if (currentSubHeading.hasSubSubHeadings() && currentSubHeading.hasRequirements())
+                            {
+                                List<JointHeading> j_list = tf.buildJointHeadingList(currentSubHeading);
+                                List<Location> locations = new List<Location>();
+                                int ssh_count = 0;
+                                int req_count = 0;
+
+                                for(int k = 0;k <j_list.Count;k++)
+                                {
+                                    JointHeading jh = j_list[k];
+                                    if(jh.isSubSubHeading()) {
+                                        currentSubSubHeading = jh.getSubSubHeading();
+                                        int ssh_row = currentSubSubHeading.getLocation().getRow() + currentSubSubHeading.getRequirements().Count + 1;
+                                        int ssh_col = currentSubSubHeading.getLocation().getColumn() + 1 + systemNumber;
+                                        Location ssh_l = new Location(ssh_row, ssh_col);
+                                        locations.Add(ssh_l);
+                                        String ssh_data = currentSubSubHeading.assignAverageForRequirements(systemNumber);
+                                        writeToSingleCell(ssh_l, ssh_data, 0);
+                                        ssh_count++;
+                                    }
+                                    if(jh.isRequirement()) {
+                                        int ssh_row = jh.getLocation().getRow();
+                                        int ssh_col = jh.getLocation().getColumn() + 1 + systemNumber;
+                                        Location ssh_l = new Location(ssh_row, ssh_col);
+                                        locations.Add(ssh_l);
+                                        req_count++;
+                                    }
+                                    
+                                }
+
+                                String averageOfRequirements = "";
+                                for (int k = 0; k < locations.Count; k++)
+                                {
+                                    Location newLoc = locations[k];
+                                    if (k == (locations.Count - 1))
+                                    {
+
+                                        averageOfRequirements = "AVERAGE(" + averageOfRequirements + newLoc.getExcelAddress() + ") ";
+                                    }
+                                    else
+                                    {
+                                        averageOfRequirements = averageOfRequirements + newLoc.getExcelAddress() + ", ";
+                                    }
+
+                                }
+                                averageOfRequirements = "=IFERROR(" + averageOfRequirements + "/10,\"\")";
+
+                                int row = currentSubHeading.getLocation().getRow();// + j_list.Count + 1 + ssh_count;
+                                int col = currentSubHeading.getLocation().getColumn() + 1 + systemNumber;
+                                Location l = new Location(row, col);
+                                String data = averageOfRequirements;
+                                writeToSingleCell(l, data, 2);
+                                averageAlreadyAssigned = true;
+                            }
+
+                            else if (currentSubHeading.hasSubSubHeadings())
                             {
                                 List<SubSubHeading> subSubHeadings = currentSubHeading.getSubSubHeadings();
                                 for (int k = 0; k < subSubHeadings.Count; k++)
@@ -388,7 +461,7 @@ namespace ConsoleApplication2
                                 }
                             }
 
-                            if (currentSubHeading.hasRequirements())
+                            else if (currentSubHeading.hasRequirements())
                             {
                                 
                                 int row = currentSubHeading.getLocation().getRow() + currentSubHeading.getRequirements().Count + 1;
@@ -432,8 +505,11 @@ namespace ConsoleApplication2
                             //else
                             //    Console.WriteLine("Sub heading " + currentSubHeading.getValue() + " has no  reqs");
 
-                            Location subHeadingAverageLocation = new Location(currentSubHeading.getLocation().getRow(), (currentSubHeading.getLocation().getColumn() + 1 + systemNumber));
-                            writeToSingleCell(subHeadingAverageLocation, currentSubHeadingAverage, 0);
+                            if (!averageAlreadyAssigned)
+                            {
+                                Location subHeadingAverageLocation = new Location(currentSubHeading.getLocation().getRow(), (currentSubHeading.getLocation().getColumn() + 1 + systemNumber));
+                                writeToSingleCell(subHeadingAverageLocation, currentSubHeadingAverage, 0);
+                            }
 
 
                             //     && (currentSubHeading.hasRequirements() || currentSubHeading.hasSubSubHeadings()))

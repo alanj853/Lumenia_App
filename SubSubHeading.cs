@@ -66,6 +66,7 @@ namespace ConsoleApplication2
             averageOfRequirements = "";
             for (int i = 0; i < requirements.Count; i++)
             {
+                Console.WriteLine("This is Req: " + requirements[i].getValue());
                 int row = requirements[i].getLocation().getRow();
                 int col = requirements[i].getLocation().getColumn() + 1 + systemNo;
                 Location newLoc = new Location(row, col);
