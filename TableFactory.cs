@@ -22,6 +22,10 @@ namespace ConsoleApplication2
         private const int TYPE_SYSTEM = 8;
         private const int TYPE_COMMENT = 9;
 
+        private const int NUMBERING_COLUMN_CELL_WIDTH = 9;
+        private const int EXTENDED_ROW_CELL_HEIGHT = 33; // used when we want to extend the cell height to accomodate long strings
+        private const int IGNORE_INDENT_LEVEL = 999; // some arbiritary number just to signify that we don't are about indent
+
         private Excel.Workbook currentWorkBook = null;
         private Excel.Application currentExcelApp = null;
         private Excel.Worksheet requirementsSheet = null;
@@ -375,6 +379,7 @@ namespace ConsoleApplication2
             //int rowIndex = 1;
             //int colIndex = 1;
 
+
             int rowIndex = newStartRow;
             int colIndex = newStartCol;
 
@@ -391,12 +396,12 @@ namespace ConsoleApplication2
                     for (int j = 0; j < noSystems; j++)
                     {
                         loc = new Location(rowIndex, colIndex);
-                        writeToSingleCell(loc, systemNames[j], 0, 8, 15, 55, true, false, true, System.Drawing.Color.DeepSkyBlue, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Arial Narrow", 9);
+                        writeToSingleCell(loc, systemNames[j], 0, 8, 15, 55, true, false, true, System.Drawing.Color.DeepSkyBlue, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop,IGNORE_INDENT_LEVEL, "Arial Narrow", 9);
                         colIndex++;
                     }
 
                     loc = new Location(rowIndex, colIndex);
-                    writeToSingleCell(loc, "Comments", 0, 9, 35, 55, true, false, true, System.Drawing.Color.DeepSkyBlue, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignCenter, "Arial Narrow", 11);
+                    writeToSingleCell(loc, "Comments", 0, 9, 35, 55, true, false, true, System.Drawing.Color.DeepSkyBlue, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignCenter, IGNORE_INDENT_LEVEL, "Arial Narrow", 11);
                     colIndex = newStartCol;
                     rowIndex++;
                 }
@@ -406,8 +411,8 @@ namespace ConsoleApplication2
                 String headingNumber = h.getValue();
                 String headingTitle = h.getTitle();
 
-                writeToSingleCell(headingNumberLocation, headingNumber, 0, 1, 5, 21, true, false, true, System.Drawing.Color.Black, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignCenter, "Arial", 10);
-                writeToSingleCell(headingTitleLocation, headingTitle, 0, 1, 63, 21, true, false, true, System.Drawing.Color.Black, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignCenter, "Arial", 10);
+                writeToSingleCell(headingNumberLocation, headingNumber, 0, 1, NUMBERING_COLUMN_CELL_WIDTH, 21, true, false, true, System.Drawing.Color.Black, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignCenter, IGNORE_INDENT_LEVEL, "Arial", 10);
+                writeToSingleCell(headingTitleLocation, headingTitle, 0, 1, 63, 21, true, false, true, System.Drawing.Color.Black, System.Drawing.Color.White, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignCenter, IGNORE_INDENT_LEVEL, "Arial", 10);
 
 
                 rowIndex++;
@@ -423,11 +428,11 @@ namespace ConsoleApplication2
                         Location reqNumberLocation = new Location(rowIndex, colIndex + 1);
                         String reqNumber = req.getTitle();
 
-                        writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                        writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, IGNORE_INDENT_LEVEL, "Calibri", 11);
                         rowIndex++;
                     }
                     Location reqAverageRow = new Location(rowIndex, colIndex + 1);
-                    writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
+                    writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, IGNORE_INDENT_LEVEL, "Arial", 10);
                     rowIndex++;
                 }
 
@@ -444,8 +449,8 @@ namespace ConsoleApplication2
                     //writeToSingleCell(subHeadingNumberLocation, subHeadingNumber, 0);
                     //writeToSingleCell(subHeadingTitleLocation, subHeadingTitle, 0);
 
-                    writeToSingleCell(subHeadingNumberLocation, subHeadingNumber, 0, TYPE_SUBHEADING, 5, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
-                    writeToSingleCell(subHeadingTitleLocation, subHeadingTitle, 0, TYPE_SUBHEADING, 63, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                    writeToSingleCell(subHeadingNumberLocation, subHeadingNumber, 0, TYPE_SUBHEADING, NUMBERING_COLUMN_CELL_WIDTH, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, IGNORE_INDENT_LEVEL, "Calibri", 11);
+                    writeToSingleCell(subHeadingTitleLocation, subHeadingTitle, 0, TYPE_SUBHEADING, 63, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, IGNORE_INDENT_LEVEL, "Calibri", 11);
 
                     if (subHeadingNumber == "6.1" || subHeadingNumber == "6.10")
                         Console.WriteLine("Found " + subHeadingNumber + " at location " + subHeadingNumberLocation.getAddress());
@@ -478,8 +483,8 @@ namespace ConsoleApplication2
                             subHeadingNumber = subHeadingNumber.Replace("_X", "");
 
                         Location noScoreLocation = new Location(rowIndex, colIndex + 1);
-                        writeToSingleCell(subHeadingNumberLocation, subHeadingNumber, 0, TYPE_SUBHEADING, 5, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
-                        writeToSingleCell(noScoreLocation, "No Score Required", 0, TYPE_NOSCORE, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                        writeToSingleCell(subHeadingNumberLocation, subHeadingNumber, 0, TYPE_SUBHEADING, NUMBERING_COLUMN_CELL_WIDTH, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, IGNORE_INDENT_LEVEL, "Calibri", 11);
+                        writeToSingleCell(noScoreLocation, "No Score Required", 0, TYPE_NOSCORE, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, IGNORE_INDENT_LEVEL, "Calibri", 11);
                         rowIndex++;
                     }
 
@@ -494,7 +499,7 @@ namespace ConsoleApplication2
                                 Location reqNumberLocation = new Location(rowIndex, colIndex + 1);
                                 String reqNumber = jh.getTitle();
 
-                                writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, IGNORE_INDENT_LEVEL, "Calibri", 11);
                                 rowIndex++;
 
                             }
@@ -506,8 +511,8 @@ namespace ConsoleApplication2
                                 String subSubHeadingNumber = subSubHeading.getValue();
                                 String subSubHeadingTitle = subSubHeading.getTitle();
 
-                                writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, 5, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
-                                writeToSingleCell(subSubHeadingTitleLocation, subSubHeadingTitle, 0, TYPE_SUBSUBHEADING, 63, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, NUMBERING_COLUMN_CELL_WIDTH, EXTENDED_ROW_CELL_HEIGHT, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop,IGNORE_INDENT_LEVEL, "Calibri", 11);
+                                writeToSingleCell(subSubHeadingTitleLocation, subSubHeadingTitle, 0, TYPE_SUBSUBHEADING, 63, EXTENDED_ROW_CELL_HEIGHT, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop,30, "Calibri", 11);
 
                                 if (isTen(subSubHeadingNumber))
                                     applyNumberFormatting(subSubHeadingNumberLocation, subSubHeadingNumberLocation, TYPE_SUBSUBHEADING, true);
@@ -527,8 +532,8 @@ namespace ConsoleApplication2
 
 
                                     Location noScoreLocation = new Location(rowIndex, colIndex + 1);
-                                    writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, 5, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
-                                    writeToSingleCell(noScoreLocation, "No Score Required", 0, TYPE_NOSCORE, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                    writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, NUMBERING_COLUMN_CELL_WIDTH, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop,IGNORE_INDENT_LEVEL, "Calibri", 11);
+                                    writeToSingleCell(noScoreLocation, "No Score Required", 0, TYPE_NOSCORE, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop,30, "Calibri", 11);
                                     rowIndex++;
                                 }
 
@@ -542,7 +547,7 @@ namespace ConsoleApplication2
                                         String reqNumber = req.getTitle();
 
 
-                                        writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                        writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop,40, "Calibri", 11);
                                         rowIndex++;
                                     }
 
@@ -551,7 +556,7 @@ namespace ConsoleApplication2
                                 if (!noScoreRequiredFlag_forSubSubHeading)
                                 {
                                     Location sshReqAverageRow = new Location(rowIndex, colIndex + 1);
-                                    writeToSingleCell(sshReqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
+                                    writeToSingleCell(sshReqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom,40, "Arial", 10);
                                     rowIndex++;
                                 }
 
@@ -573,11 +578,11 @@ namespace ConsoleApplication2
                             Location reqNumberLocation = new Location(rowIndex, colIndex + 1);
                             String reqNumber = req.getTitle();
 
-                            writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                            writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop,IGNORE_INDENT_LEVEL, "Calibri", 11);
                             rowIndex++;
                         }
                         Location reqAverageRow = new Location(rowIndex, colIndex + 1);
-                        writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
+                        writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom,IGNORE_INDENT_LEVEL, "Arial", 10);
                         if (spec == 1)
                         {
                             spec = 0;
@@ -599,8 +604,8 @@ namespace ConsoleApplication2
                             //writeToSingleCell(reqNumberLocation, reqNumber, 0);
                             //writeToSingleCell(reqTitleLocation, reqTitle, 0);
 
-                            writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, 5, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
-                            writeToSingleCell(subSubHeadingTitleLocation, subSubHeadingTitle, 0, TYPE_SUBSUBHEADING, 63, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                            writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, NUMBERING_COLUMN_CELL_WIDTH, EXTENDED_ROW_CELL_HEIGHT, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop,IGNORE_INDENT_LEVEL, "Calibri", 11);
+                            writeToSingleCell(subSubHeadingTitleLocation, subSubHeadingTitle, 0, TYPE_SUBSUBHEADING, 63, EXTENDED_ROW_CELL_HEIGHT, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop,30, "Calibri", 11);
 
                             if (isTen(subSubHeadingNumber))
                                 applyNumberFormatting(subSubHeadingNumberLocation, subSubHeadingNumberLocation, TYPE_SUBSUBHEADING, true);
@@ -625,8 +630,8 @@ namespace ConsoleApplication2
 
 
                                 Location noScoreLocation = new Location(rowIndex, colIndex + 1);
-                                writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, 5, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
-                                writeToSingleCell(noScoreLocation, "No Score Required", 0, TYPE_NOSCORE, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                writeToSingleCell(subSubHeadingNumberLocation, subSubHeadingNumber, 0, TYPE_SUBSUBHEADING, NUMBERING_COLUMN_CELL_WIDTH, 21, true, false, true, System.Drawing.Color.DarkGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignLeft, Excel.XlVAlign.xlVAlignTop,IGNORE_INDENT_LEVEL, "Calibri", 11);
+                                writeToSingleCell(noScoreLocation, "No Score Required", 0, TYPE_NOSCORE, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop,IGNORE_INDENT_LEVEL, "Calibri", 11);
                                 rowIndex++;
                             }
 
@@ -640,7 +645,7 @@ namespace ConsoleApplication2
                                     String reqNumber = req.getTitle();
 
 
-                                    writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                                    writeToSingleCell(reqNumberLocation, reqNumber, 0, TYPE_REQUIREMENT, 63, 21, true, false, true, System.Drawing.Color.AliceBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignRight, Excel.XlVAlign.xlVAlignTop,40, "Calibri", 11);
                                     rowIndex++;
                                 }
 
@@ -666,8 +671,9 @@ namespace ConsoleApplication2
                             if (!noScoreRequiredFlag_forSubSubHeading)
                             {
                                 Location reqAverageRow = new Location(rowIndex, colIndex + 1);
-                                writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom, "Arial", 10);
+                                writeToSingleCell(reqAverageRow, "Average", 0, TYPE_AVERAGE, 63, 21, false, true, true, System.Drawing.Color.LightBlue, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignCenter, Excel.XlVAlign.xlVAlignBottom,40, "Arial", 10);
                                 rowIndex++;
+                             
                             }
 
                         }
@@ -742,7 +748,7 @@ namespace ConsoleApplication2
                     //Console.WriteLine("     Adding Data to " + colIndex);
                     Location startRange = new Location(l.getRow(), colIndex);
                     Location endRange = new Location(l.getRow(), colIndex + noSystems - 1);
-                    writeToMultipleCells(startRange, endRange, "", 0, 1, 15, 21, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
+                    writeToMultipleCells(startRange, endRange, "", 0, 1, 15, EXTENDED_ROW_CELL_HEIGHT, true, false, true, System.Drawing.Color.LightGray, System.Drawing.Color.Black, Excel.XlHAlign.xlHAlignGeneral, Excel.XlVAlign.xlVAlignTop, "Calibri", 11);
 
                     //applyBorders(startRange, endRange);
                 }
@@ -1058,7 +1064,7 @@ namespace ConsoleApplication2
         }
 
         private void writeToSingleCell(Location cellLocation, string value, int mode, int cellType, double cellWidth, double cellHeight, bool boldFlag, bool italicsFlag, bool wrapTextFlag, System.Drawing.Color cellColour,
-            System.Drawing.Color textColour, Excel.XlHAlign horizAlignment, Excel.XlVAlign vertAlignment, String fontName, int fontSize)
+            System.Drawing.Color textColour, Excel.XlHAlign horizAlignment, Excel.XlVAlign vertAlignment,int indentLevel, String fontName, int fontSize)
         {
             int row = cellLocation.getRow();
             int col = cellLocation.getColumn();
@@ -1087,6 +1093,9 @@ namespace ConsoleApplication2
                 r.Font.Name = fontName;
                 r.Font.Size = fontSize;
                 r.NumberFormat = "";
+
+            if(indentLevel != IGNORE_INDENT_LEVEL)
+                r.IndentLevel = indentLevel;
             }
         }
 
