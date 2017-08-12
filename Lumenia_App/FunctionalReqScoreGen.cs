@@ -144,6 +144,9 @@ using Excel = Microsoft.Office.Interop.Excel;
 
         public void run()
         {
+
+            try 
+                {
             // Initial testing
 
             tf = new TableFactory(filePath, startRow, startCol, tasksCompleted);
@@ -180,7 +183,7 @@ using Excel = Microsoft.Office.Interop.Excel;
                 Console.WriteLine("Current Number of Systems Assigned: " + this.noSystems);
                 Console.WriteLine("\n##############################\n");
                 appFinishedRunning = true;
-                exitCode = -1;
+                exitCode = -2;
             }
 
             else if (noScorers < 1)
@@ -190,7 +193,7 @@ using Excel = Microsoft.Office.Interop.Excel;
                 Console.WriteLine("Current Number of Scorers Assigned: " + this.noScorers);
                 Console.WriteLine("\n##############################\n");
                 appFinishedRunning = true;
-                exitCode = -1;
+                exitCode = -3;
             }
 
             else if (!validateExcelFile())
@@ -200,7 +203,7 @@ using Excel = Microsoft.Office.Interop.Excel;
                 Console.WriteLine("Current File Path: " + this.filePath);
                 Console.WriteLine("\n##############################\n");
                 appFinishedRunning = true;
-                exitCode = -1;
+                exitCode = -4;
             }
 
             else if (!validateRangeSelected())
@@ -210,7 +213,7 @@ using Excel = Microsoft.Office.Interop.Excel;
                 Console.WriteLine("Current Range: (" + lowerRange + ":" + upperRange + ")");
                 Console.WriteLine("\n##############################\n");
                 appFinishedRunning = true;
-                exitCode = -1;
+                exitCode = -5;
             }
             else
             {
@@ -586,7 +589,17 @@ using Excel = Microsoft.Office.Interop.Excel;
                 appFinishedRunning = true;
 
             }
-        }
+            }
+            catch(Exception e) {
+                Console.WriteLine("Exception Caught");
+                DateTime today = DateTime.Now;
+                String time = today.Day.ToString() + today.Month.ToString() + today.Year.ToString() + "_" + today.Hour.ToString() + today.Minute.ToString() + today.Second.ToString();
+                String filename = "error_log_funct_gen" + time + ".txt";
+                String fileContent = e.Message.ToString() + Environment.NewLine;
+                System.IO.File.WriteAllText(filename, fileContent);
+            }           
+ }
+        
 
         private string formatNewAverageString(string currentSubHeadingAverage_ssh, string currentSubHeadingAverage_req)
         {
